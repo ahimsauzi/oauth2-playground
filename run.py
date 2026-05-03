@@ -10,14 +10,14 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 server = subprocess.Popen(
-    [sys.executable, "-m", "uvicorn", "server.main:app", "--port", "8000", "--reload"],
+    [sys.executable, "-m", "uvicorn", "server.main:app", "--port", "8000"],
     cwd=HERE,
 )
 
 time.sleep(1)
 
 client = subprocess.Popen(
-    [sys.executable, "-m", "uvicorn", "client.main:app", "--port", "8001", "--reload"],
+    [sys.executable, "-m", "uvicorn", "client.main:app", "--port", "8001"],
     cwd=HERE,
 )
 
@@ -25,6 +25,7 @@ print("\nOAuth2 Playground running:")
 print("  Auth Server:  http://localhost:8000")
 print("  Client App:   http://localhost:8001  <-- open this")
 print("  Discovery:    http://localhost:8000/.well-known/openid-configuration")
+print("  Debug:        http://localhost:8000/debug")
 print("\nCtrl+C to stop both servers\n")
 
 try:

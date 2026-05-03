@@ -199,7 +199,7 @@ async def token(
 
     if grant_type == "authorization_code":
         if code not in auth_codes:
-            raise HTTPException(status_code=400, detail="Invalid or expired code")
+            raise HTTPException(status_code=400, detail=f"Invalid or expired code. Received: {code[:8] if code else 'none'}. Codes on server: {len(auth_codes)}.")
 
         stored = auth_codes.pop(code)
         if stored["expires_at"] < time.time():
@@ -311,6 +311,15 @@ async def introspect(
 # -------------------------
 # Tracer API (consumed by client UI)
 # -------------------------
+@app.get("/debug")
+async def debug():
+    return {
+        "auth_codes_count": len(auth_codes),
+        "auth_codes_keys": [k[:8] + "..." for k in auth_codes.keys()],
+        "access_tokens_count": len(access_tokens),
+    }
+
+
 @app.get("/trace")
 async def get_trace():
     return {"events": trace_log}
