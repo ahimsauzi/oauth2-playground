@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth2 Playground</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: system-ui, sans-serif; margin: 0; background: #f5f5f5; color: #222; }
+        header { background: #1a1a2e; color: white; padding: 1rem 2rem; display: flex; align-items: center; gap: 1rem; }
+        header h1 { margin: 0; font-size: 1.25rem; }
+        header .subtitle { font-size: 0.8rem; color: #aaa; }
+        .layout { display: grid; grid-template-columns: 340px 1fr; gap: 1rem; padding: 1rem 2rem; max-width: 1400px; margin: 0 auto; }
+        .panel { background: white; border-radius: 8px; padding: 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+        h3 { margin: 0 0 1rem; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; color: #444; }
+        .flow-btn { display: block; width: 100%; padding: 0.6rem 0.9rem; margin-bottom: 0.6rem; border: 1px solid #ddd; border-radius: 6px; background: white; text-align: left; cursor: pointer; text-decoration: none; color: #222; font-size: 0.875rem; transition: background 0.1s; }
+        .flow-btn:hover { background: #f0f4ff; border-color: #0066cc; }
+        .flow-btn .tag { float: right; font-size: 0.7rem; padding: 2px 6px; border-radius: 3px; }
+        .tag-front { background: #dbeafe; color: #1e40af; }
+        .tag-back { background: #dcfce7; color: #166534; }
+        .tag-both { background: #fef9c3; color: #854d0e; }
+        .token-box { background: #f8f8f8; border-radius: 6px; padding: 0.75rem; font-family: monospace; font-size: 0.78rem; word-break: break-all; margin-bottom: 0.75rem; }
+        .token-box .label { font-family: system-ui; font-size: 0.7rem; color: #888; text-transform: uppercase; margin-bottom: 0.25rem; }
+        .pill { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; margin: 2px; }
+        .pill-scope { background: #e8f4ff; color: #0066cc; }
+        .pill-flow { background: #f0fdf4; color: #166534; }
+        .error-box { background: #fff5f5; border: 1px solid #fecaca; color: #991b1b; border-radius: 6px; padding: 0.75rem; font-size: 0.85rem; margin-bottom: 0.75rem; }
+        .actions a { display: inline-block; padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.85rem; text-decoration: none; margin-right: 0.5rem; margin-bottom: 0.4rem; }
+        .btn-primary { background: #0066cc; color: white; }
+        .btn-secondary { background: #f0f0f0; color: #333; border: 1px solid #ddd; }
+        .btn-danger { background: white; color: #cc0000; border: 1px solid #fecaca; }
+
+        /* Tracer */
+        .tracer { font-family: monospace; font-size: 0.78rem; }
+        .event { display: flex; gap: 0.5rem; padding: 0.4rem 0; border-bottom: 1px solid #f0f0f0; align-items: flex-start; }
+        .event:last-child { border-bottom: none; }
+        .ch { min-width: 48px; padding: 1px 5px; border-radius: 3px; text-align: center; font-size: 0.7rem; font-weight: 600; }
+        .ch-front { background: #dbeafe; color: #1e40af; }
+        .ch-back { background: #dcfce7; color: #166534; }
+        .dir { min-width: 60px; color: #888; }
+        .ev-label { font-weight: 500; color: #222; flex: 1; }
+        .ev-data { color: #666; font-size: 0.72rem; }
+        .empty-trace { color: #aaa; font-style: italic; padding: 1rem 0; }
+        .refresh-note { font-size: 0.75rem; color: #aaa; margin-top: 0.5rem; }
+    </style>
+</head>
+<body>
+<header>
+    <div>
+        <h1>OAuth2 Playground</h1>
+        <div class="subtitle">Front channel (browser) + Back channel (server) with live tracer</div>
+    </div>
+</header>
+
+<div class="layout">
+    <div>
+        <!-- Flows -->
+        <div class="panel" style="margin-bottom:1rem;">
+            <h3>Flows</h3>
+
+            <a href="/login/pkce" class="flow-btn">
+                Authorization Code + PKCE
+                <span class="tag tag-both">front + back</span>
+            </a>
+            <div style="font-size:0.75rem;color:#666;margin:-0.3rem 0 0.6rem 0.5rem;">
+                Redirect to IdP, login, exchange code with PKCE verifier
+            </div>
+
+            <a href="/login/code" class="flow-btn">
+                Authorization Code (secret)
+                <span class="tag tag-both">front + back</span>
+            </a>
+            <div style="font-size:0.75rem;color:#666;margin:-0.3rem 0 0.6rem 0.5rem;">
+                Same flow but uses client_secret instead of PKCE
+            </div>
+
+            <a href="/login/client-credentials" class="flow-btn">
+                Client Credentials
+                <span class="tag tag-back">back only</span>
+            </a>
+            <div style="font-size:0.75rem;color:#666;margin:-0.3rem 0 0.6rem 0.5rem;">
+                No user, no browser. Server-to-server with client secret.
+            </div>
+        </div>
+
+        <!-- Session state -->
+        <div class="panel">
+            <h3>Session State</h3>
+
+            {% if session.error %}
+            <div class="error-box">{{ session.error }}</div>
+            {% endif %}
+
+            {% if session.access_token %}
+            <div class="token-box">
+                <div class="label">Access Token</div>
+                {{ session.access_token }}
+            </div>
+            {% if session.scope %}
+            <div style="margin-bottom:0.5rem;">
+                {% for s in session.scope.split() %}
+                <span class="pill pill-scope">{{ s }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% if session.flow %}
+            <div style="margin-bottom:0.75rem;">
+                <span class="pill pill-flow">{{ session.flow }}</span>
+            </div>
+            {% endif %}
+
+            <div class="actions">
+                <a href="/introspect" class="btn-primary">Introspect token</a>
+                <a href="/clear" class="btn-danger">Clear session</a>
+            </div>
+
+            {% if session.introspect_result %}
+            <div style="margin-top:1rem;">
+                <div class="token-box">
+                    <div class="label">Introspection Result</div>
+                    {% for k, v in session.introspect_result.items() %}
+                    <div><span style="color:#666;">{{ k }}:</span> {{ v }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div style="color:#888;font-size:0.875rem;">No active session. Run a flow to get a token.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Live tracer -->
+    <div class="panel">
+        <h3>Live Flow Tracer
+            <a href="/" style="float:right;font-size:0.75rem;color:#0066cc;text-decoration:none;">refresh</a>
+        </h3>
+        <div class="tracer">
+            {% if events %}
+            {% for e in events %}
+            <div class="event">
+                <span class="ch ch-{{ e.channel }}">{{ e.channel }}</span>
+                <span class="dir">{{ e.direction }}</span>
+                <div>
+                    <div class="ev-label">{{ e.label }}</div>
+                    <div class="ev-data">
+                        {% for k, v in e.data.items() %}
+                        {{ k }}: {{ v }}&nbsp;&nbsp;
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-trace">No events yet. Run a flow to see the trace.</div>
+            {% endif %}
+        </div>
+        <div class="refresh-note">Tracer updates on page refresh. Front channel = browser redirects. Back channel = server-to-server calls.</div>
+    </div>
+</div>
+</body>
+</html>

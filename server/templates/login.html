@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In | OAuth2 Playground IdP</title>
+    <style>
+        body { font-family: system-ui, sans-serif; background: #f0f2f5; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .card { background: white; border-radius: 8px; padding: 2rem; width: 360px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+        .idp-label { font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.5rem; }
+        h2 { margin: 0 0 0.25rem; font-size: 1.25rem; }
+        .client-badge { font-size: 0.8rem; color: #555; margin-bottom: 1.5rem; }
+        .scope-pill { display: inline-block; background: #e8f4ff; color: #0066cc; border-radius: 4px; padding: 2px 8px; font-size: 0.75rem; margin: 2px; }
+        label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.25rem; margin-top: 1rem; }
+        input[type=text], input[type=password] { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.9rem; box-sizing: border-box; }
+        button { width: 100%; padding: 0.6rem; background: #0066cc; color: white; border: none; border-radius: 6px; font-size: 0.95rem; cursor: pointer; margin-top: 1.25rem; }
+        button:hover { background: #0052a3; }
+        .error { color: #cc0000; font-size: 0.85rem; margin-top: 0.5rem; }
+        .hint { font-size: 0.75rem; color: #888; margin-top: 1rem; }
+        .pkce-badge { font-size: 0.75rem; color: #2d7a3a; background: #e8f5e9; border-radius: 4px; padding: 3px 8px; display: inline-block; margin-top: 0.5rem; }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="idp-label">OAuth2 Playground IdP</div>
+    <h2>Sign in</h2>
+    <div class="client-badge">
+        Requested by: <strong>{{ client_id }}</strong>
+        <br>Scopes: {% for s in scope.split() %}<span class="scope-pill">{{ s }}</span>{% endfor %}
+        {% if code_challenge %}
+        <br><span class="pkce-badge">PKCE enabled ({{ code_challenge_method }})</span>
+        {% endif %}
+    </div>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+        <input type="hidden" name="client_id" value="{{ client_id }}">
+        <input type="hidden" name="redirect_uri" value="{{ redirect_uri }}">
+        <input type="hidden" name="scope" value="{{ scope }}">
+        <input type="hidden" name="state" value="{{ state }}">
+        <input type="hidden" name="code_challenge" value="{{ code_challenge }}">
+        <input type="hidden" name="code_challenge_method" value="{{ code_challenge_method }}">
+
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="alice or bob" autocomplete="username" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="alice123 or bob123" autocomplete="current-password" required>
+
+        <button type="submit">Authorize</button>
+    </form>
+    <div class="hint">Test users: alice / alice123 &nbsp;&nbsp; bob / bob123</div>
+</div>
+</body>
+</html>
