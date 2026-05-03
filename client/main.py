@@ -337,7 +337,7 @@ async def guided_pkce_step3(request: Request):
 @app.post("/guided/pkce/step4", response_class=HTMLResponse)
 async def guided_pkce_step4_exec(request: Request):
     if not flow_store.active or not flow_store.auth_code:
-        return RedirectResponse(url="/guided/pkce/step1")
+        return RedirectResponse(url="/guided/pkce/step1", status_code=303)
 
     async with httpx.AsyncClient() as client:
         resp = await client.post(f"{AUTH_SERVER}/token", data={
@@ -364,7 +364,7 @@ async def guided_pkce_step4_exec(request: Request):
 
     token_resp = resp.json()
     flow_store.save_token(token_resp)
-    return RedirectResponse(url="/guided/pkce/step4")
+    return RedirectResponse(url="/guided/pkce/step4", status_code=303)
 
 
 @app.get("/guided/pkce/step4", response_class=HTMLResponse)
@@ -414,7 +414,7 @@ async def guided_pkce_step5_exec(request: Request):
             "client_secret": CLIENT_SECRET,
         })
     flow_store.save_introspect(resp.json())
-    return RedirectResponse(url="/guided/pkce/step5")
+    return RedirectResponse(url="/guided/pkce/step5", status_code=303)
 
 
 @app.get("/guided/pkce/step5", response_class=HTMLResponse)
@@ -494,7 +494,7 @@ async def guided_cc_step2_exec(request: Request):
         })
     token_resp = resp.json()
     flow_store.save_token(token_resp)
-    return RedirectResponse(url="/guided/cc/step2")
+    return RedirectResponse(url="/guided/cc/step2", status_code=303)
 
 
 @app.get("/guided/cc/step2", response_class=HTMLResponse)
