@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ step_title }} | OAuth2 Playground</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: system-ui, sans-serif; background: #0d1117; color: #c9d1d9; margin: 0; }
+        header { background: #161b22; border-bottom: 1px solid #30363d; padding: 0.75rem 2rem; display: flex; align-items: center; gap: 1rem; }
+        header a { color: #58a6ff; font-size: 0.85rem; text-decoration: none; }
+        header h1 { margin: 0; font-size: 1rem; color: #e6edf3; flex: 1; }
+
+        .container { max-width: 860px; margin: 2rem auto; padding: 0 1.5rem; }
+
+        /* Progress */
+        .step-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+        .step-badge { font-family: monospace; font-size: 0.72rem; color: #8b949e; background: #161b22; border: 1px solid #30363d; border-radius: 4px; padding: 0.25rem 0.7rem; white-space: nowrap; }
+        .step-progress { flex: 1; height: 3px; background: #21262d; border-radius: 2px; overflow: hidden; }
+        .step-progress-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, #1f6feb, #3fb950); transition: width 0.4s ease; }
+
+        /* Channel badge */
+        .channel-badge { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-bottom: 0.5rem; }
+        .ch-front { background: rgba(31, 111, 235, 0.15); color: #58a6ff; border: 1px solid #1f6feb; }
+        .ch-back { background: rgba(63, 185, 80, 0.15); color: #3fb950; border: 1px solid #3fb950; }
+
+        h2 { margin: 0 0 0.5rem; font-size: 1.25rem; color: #e6edf3; }
+        .what-happening { font-size: 0.9rem; line-height: 1.7; color: #c9d1d9; margin-bottom: 1.5rem; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 1rem 1.25rem; }
+        .what-happening strong { color: #e6edf3; }
+
+        /* Panels */
+        .panel { border-radius: 8px; border: 1px solid #30363d; overflow: hidden; margin-bottom: 1rem; }
+        .panel-header { padding: 0.5rem 1rem; font-family: monospace; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; display: flex; align-items: center; gap: 0.5rem; }
+        .panel-req .panel-header { background: #0d2818; border-bottom: 1px solid #1a3828; color: #3fb950; }
+        .panel-res .panel-header { background: #0d1829; border-bottom: 1px solid #1a2840; color: #58a6ff; }
+        .panel-body { padding: 1rem 1.25rem; background: #0d1117; }
+
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 0.3rem 0.6rem; font-size: 0.82rem; border-bottom: 1px solid #21262d; vertical-align: top; }
+        td:last-child { border-bottom: none; }
+        tr:last-child td { border-bottom: none; }
+        td.key { font-family: monospace; color: #3fb950; white-space: nowrap; width: 30%; }
+        td.val { color: #c9d1d9; word-break: break-all; }
+        .note { color: #6e7681; font-size: 0.75rem; display: block; margin-top: 0.2rem; font-family: system-ui; }
+
+        .waiting { color: #6e7681; font-style: italic; font-size: 0.85rem; padding: 0.5rem 0; }
+
+        /* Security note */
+        .security-note { background: #2d1f00; border: 1px solid #d29922; border-radius: 6px; padding: 0.75rem 1rem; font-size: 0.82rem; color: #e3b341; margin-bottom: 1.5rem; }
+        .security-note strong { color: #f0c040; }
+
+        /* Actions */
+        .actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+        .btn-primary { background: #1f6feb; color: white; border: none; border-radius: 6px; padding: 0.6rem 1.4rem; font-size: 0.9rem; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-primary:hover { background: #388bfd; }
+        .btn-secondary { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; border-radius: 6px; padding: 0.6rem 1.2rem; font-size: 0.85rem; cursor: pointer; text-decoration: none; display: inline-block; }
+        .btn-secondary:hover { background: #30363d; }
+        .skip-note { font-size: 0.78rem; color: #6e7681; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>OAuth2 Playground - Guided Mode</h1>
+    <a href="/">Back to dashboard</a>
+</header>
+
+<div class="container">
+    <div class="step-header">
+        <div class="step-badge">Step {{ step_num }} of {{ step_total }}</div>
+        <div class="step-progress">
+            <div class="step-progress-fill" style="width: {{ (step_num / step_total * 100)|int }}%"></div>
+        </div>
+    </div>
+
+    <span class="channel-badge ch-{{ channel }}">{{ channel }} channel</span>
+    <h2>{{ step_title }}</h2>
+
+    <div class="what-happening">{{ what_happening|safe }}</div>
+
+    {% if security_note %}
+    <div class="security-note"><strong>Security note:</strong> {{ security_note }}</div>
+    {% endif %}
+
+    <!-- Request panel -->
+    <div class="panel panel-req">
+        <div class="panel-header">Request</div>
+        <div class="panel-body">
+            {% if request_params %}
+            <table>
+                {% for key, info in request_params.items() %}
+                <tr>
+                    <td class="key">{{ key }}</td>
+                    <td class="val">
+                        {{ info.value }}
+                        {% if info.note %}<span class="note">{{ info.note }}</span>{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <span class="waiting">No outbound request parameters for this step.</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Response panel -->
+    <div class="panel panel-res">
+        <div class="panel-header">Response</div>
+        <div class="panel-body">
+            {% if response_params %}
+            <table>
+                {% for key, info in response_params.items() %}
+                <tr>
+                    <td class="key">{{ key }}</td>
+                    <td class="val">
+                        {{ info.value }}
+                        {% if info.note %}<span class="note">{{ info.note }}</span>{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <span class="waiting">Waiting for response - click the button below to execute this step.</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="actions">
+        {% if action_url %}
+        {% if action_method == "post" %}
+        <form method="post" action="{{ action_url }}" style="display:inline;">
+            <button type="submit" class="btn-primary">{{ action_label }}</button>
+        </form>
+        {% else %}
+        <a href="{{ action_url }}" class="btn-primary">{{ action_label }}</a>
+        {% endif %}
+        {% endif %}
+        <a href="/" class="btn-secondary">Skip guided mode</a>
+        <span class="skip-note">You can always run flows instantly from the dashboard.</span>
+    </div>
+</div>
+</body>
+</html>

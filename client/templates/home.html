@@ -54,9 +54,25 @@
 
 <div class="layout">
     <div>
+        <!-- Guided Mode -->
+        <div class="panel" style="margin-bottom:1rem; border-color: #1f6feb;">
+            <h3 style="color:#0066cc;">Guided Mode (Step-through)</h3>
+            <p style="font-size:0.8rem;color:#555;margin:0 0 0.75rem;">
+                Pause at each step. Read what's happening. Click to advance.
+            </p>
+            <a href="/guided/pkce/step1" class="flow-btn" style="border-color:#1f6feb;background:#f0f4ff;">
+                Authorization Code + PKCE - Guided
+                <span class="tag tag-both">5 steps</span>
+            </a>
+            <a href="/guided/cc/step1" class="flow-btn" style="border-color:#1f6feb;background:#f0f4ff;">
+                Client Credentials - Guided
+                <span class="tag tag-back">2 steps</span>
+            </a>
+        </div>
+
         <!-- Flows -->
         <div class="panel" style="margin-bottom:1rem;">
-            <h3>Flows</h3>
+            <h3>Instant Flows</h3>
 
             <a href="/login/pkce" class="flow-btn">
                 Authorization Code + PKCE

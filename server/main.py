@@ -22,7 +22,7 @@ templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 CLIENTS = {
     "playground-client": {
         "client_secret": "playground-secret",
-        "redirect_uris": ["http://localhost:8001/callback"],
+        "redirect_uris": ["http://localhost:8001/callback", "http://localhost:8001/guided/callback"],
         "grant_types": ["authorization_code", "client_credentials"],
         "scopes": ["openid", "profile", "email", "read", "write"],
     }
