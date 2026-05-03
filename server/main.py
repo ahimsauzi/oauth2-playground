@@ -39,14 +39,6 @@ access_tokens = {}  # token -> {client_id, scope, user, expires_at}
 trace_log = []    # ordered list of trace events for the flow tracer
 
 
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    print(f"[AUTH] {request.method} {request.url.path} | codes_before={len(auth_codes)}")
-    response = await call_next(request)
-    print(f"[AUTH] -> {response.status_code} | codes_after={len(auth_codes)} | keys={[k[:8] for k in auth_codes]}")
-    return response
-
-
 def add_trace(channel: str, direction: str, label: str, data: dict):
     trace_log.append({
         "ts": round(time.time() * 1000),
@@ -207,7 +199,7 @@ async def token(
 
     if grant_type == "authorization_code":
         if code not in auth_codes:
-            raise HTTPException(status_code=400, detail=f"Invalid or expired code. Received: {code[:8] if code else 'none'}. Codes on server: {len(auth_codes)}.")
+            raise HTTPException(status_code=400, detail="Invalid or expired code")
 
         stored = auth_codes.pop(code)
         if stored["expires_at"] < time.time():
