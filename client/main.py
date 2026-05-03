@@ -316,7 +316,8 @@ async def guided_pkce_step3(request: Request):
             "This is still the front channel: the code arrived via a browser redirect, visible in the URL bar. "
             "We checked the <strong>state</strong> parameter matches what we sent. "
             f"State match: <strong>{'yes' if state_ok else 'NO - CSRF possible'}</strong>. "
-            "The code is a one-time voucher, valid for 60 seconds. "
+            "The code is a one-time voucher. In production it typically expires in 60 seconds. "
+            "This playground gives you 5 minutes to read and continue. "
             "It is not an access token. It proves the user logged in but gives us nothing on its own. "
             "Next we exchange it on the back channel."
         ),

@@ -157,7 +157,7 @@ async def authorize_post(
         "user": username,
         "pkce_challenge": code_challenge,
         "pkce_method": code_challenge_method,
-        "expires_at": time.time() + 60,
+        "expires_at": time.time() + 300,  # 5 min for guided learning mode
     }
 
     add_trace("front", "response", "Authorization Code Issued (redirect)", {
