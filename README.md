@@ -1,11 +1,12 @@
 # OAuth2 Playground
 
-Dev and learning tool inside ccode-pipeline. Runs two local servers to demonstrate OAuth2 flows with a live tracer showing which calls are front channel (browser) vs back channel (server-to-server).
+A local two-server dev and learning tool. Runs two local servers to demonstrate OAuth2 flows with a live tracer showing which calls are front channel (browser) vs back channel (server-to-server).
 
 ## Start
 
 ```bash
-cd tools/oauth2-playground
+git clone https://github.com/ahimsauzi/oauth2-playground
+cd oauth2-playground
 pip install -r requirements.txt
 python run.py
 ```
@@ -40,4 +41,4 @@ bob / bob123
 
 ## Notes
 
-Put observations and learnings in `notes/`. Sage monitors this folder for content drafts.
+Observations and learnings from building this live in `notes/`.
